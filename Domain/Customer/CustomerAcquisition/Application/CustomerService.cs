@@ -1,6 +1,6 @@
 ﻿using CustomerAcquisition.Application.Commands;
 using CustomerAcquisition.Domain.Model;
-using CustomerAcquisition.Repositories;
+using CustomerAcquisition.Domain.Model.Repositories;
 using Shared;
 using System;
 using System.Collections.Generic;
@@ -22,8 +22,24 @@ namespace CustomerAcquisition.Application
         public void CreateCustomer(NewCustomerCommand command)
         {
             var customer = Customer.Factory.New(command);
-            var repository = _unitOfWork.GetRepository<ICustomerRepository>();
-            repository.Save(customer);
+            var customerRepository = _unitOfWork.GetRepository<ICustomerRepository>(command.RepositoryKey);
+				var addressRepository = _unitOfWork.GetRepository<IAddressRepository>();
+
+			try
+			{
+				_unitOfWork.Begin( System.Data.IsolationLevel.ReadUncommitted );
+            customerRepository.Save(customer);
+				addressRepository.Save(Guid.NewGuid(), customer.Address );
+				_unitOfWork.Commit();
+			}
+			catch( Exception ex)
+			{
+				_unitOfWork.Rollback();
+			}
+			finally
+			{
+				_unitOfWork.Dispose();
+			}
         }
     }
 }

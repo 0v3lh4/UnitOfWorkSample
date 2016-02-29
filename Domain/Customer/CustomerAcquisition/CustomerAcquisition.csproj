@@ -11,6 +11,7 @@
     <AssemblyName>CustomerAcquisition</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +45,8 @@
     <Compile Include="Application\CustomerService.cs" />
     <Compile Include="Domain.Model\Repositories\ICustomerRepository.cs" />
     <Compile Include="Domain.Model\Customer.cs" />
+    <Compile Include="Domain.Model\Repositories\IAddressRepository.cs" />
+    <Compile Include="Domain.Model\ValueObjects\Address.cs" />
     <Compile Include="Domain.Model\ValueObjects\Document.cs" />
     <Compile Include="Domain.Model\ValueObjects\Name.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

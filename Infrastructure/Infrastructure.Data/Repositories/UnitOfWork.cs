@@ -6,62 +6,67 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using Microsoft.Practices.Unity;
+using Infrastructure.Data.ConnectionRepository;
 
 namespace Infrastructure.Data.Repositories
 {
-    public class UnitOfWork : IUnitOfWork
-    {
-        readonly ICollection<object> _repositories;
-        readonly IUnityContainer _container;
-        IDataContext _dapperContext;
-        IDbTransaction _transaction;
+	public class UnitOfWork : IUnitOfWork
+	{
+		readonly ICollection<object> _repositories;
+		readonly IUnityContainer _container;
+		readonly IConnectionRepository _connectionRepository;
+		IDataContext _dapperContext;
 
-        public UnitOfWork(IUnityContainer container, string connectionString)
-        {
-            _container = container;
-            _repositories = new HashSet<object>();
-            _dapperContext = new DapperContext(connectionString);
-        }
+		public UnitOfWork( IUnityContainer container, IConnectionRepository connection )
+		{
+			_container = container;
+			_connectionRepository = connection;
+			_repositories = new HashSet<object>();
+		}
 
-        public void Begin(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
-        {
-            _transaction = _dapperContext.Connection.BeginTransaction(isolationLevel);
-        }
+		public void Begin( IsolationLevel isolationLevel = IsolationLevel.ReadCommitted )
+		{
+			_dapperContext.BeginTransaction( isolationLevel );
+		}
 
-        public void Commit()
-        {
-            _transaction.Commit();
-            _transaction = null;
-        }
+		public void Commit()
+		{
+			_dapperContext.Commit();
+		}
 
-        public void Dispose()
-        {
-            if(_transaction != null)
-            {
-                Commit();
-            }
+		public void Dispose()
+		{
+			if( _dapperContext != null )
+			{
+				_dapperContext.Dispose();
+			}
+		}
 
-            _dapperContext.Dispose();
-        }
+		public T GetRepository<T>( string repositoryKey = null ) where T : class
+		{
+			if( _repositories.Any( rep => typeof( T ).IsInstanceOfType(rep) ) )
+				return ( T )_repositories.Where( rep => typeof( T ).IsInstanceOfType(rep) ).First();
 
-        public T GetRepository<T>() where T : class
-        {
-            if(_repositories.Any(rep => rep.GetType() == typeof(T)))
-                return (T)_repositories.Where(rep => rep.GetType() == typeof(T)).First();
+			createDapperContext( repositoryKey );
 
-            var repository = _container.Resolve<T>(new ResolverOverride[] {
-                new ParameterOverride("context", _dapperContext)
-            });
+			var repository = _container.Resolve<T>( new ResolverOverride[] {
+					 new ParameterOverride("context", _dapperContext)
+				} );
 
-            _repositories.Add(repository);
+			_repositories.Add( repository );
 
-            return repository;
-        }
+			return repository;
+		}
 
-        public void Rollback()
-        {
-            _transaction.Rollback();
-            _transaction = null;
-        }
-    }
+		private void createDapperContext( string repositoryKey )
+		{
+			if( _dapperContext == null )
+				_dapperContext = new DapperContext( _connectionRepository.GetConnectionString( repositoryKey ) );
+		}
+
+		public void Rollback()
+		{
+			_dapperContext.Rollback();
+		}
+	}
 }

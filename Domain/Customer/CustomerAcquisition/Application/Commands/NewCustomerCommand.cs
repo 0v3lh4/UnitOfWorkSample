@@ -11,5 +11,12 @@ namespace CustomerAcquisition.Application.Commands
         public string Firstname { get; set; }
         public string Lastname { get; set; }
         public string Number { get; set; }
-    }
+        public string AddressLine { get; set; }
+        public string AddressLine2 { get; set; }
+        public string AddressCode { get; set; }
+		  public string RepositoryKey
+		  {
+		  	get; set;
+		  }
+	}
 }

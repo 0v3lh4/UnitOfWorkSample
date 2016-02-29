@@ -13,7 +13,7 @@ namespace CustomerAcquisition.Domain.Model.ValueObjects
 
         public Document(string numberOriginal)
         {
-            numberOriginal = NumberOriginal;
+            NumberOriginal = numberOriginal;
             Number = numberOriginal?
                     .Replace(".", string.Empty)
                     .Replace("-", string.Empty)

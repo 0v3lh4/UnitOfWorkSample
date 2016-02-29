@@ -1,6 +1,6 @@
 ﻿using CustomerAcquisition.Domain.Model;
 
-namespace CustomerAcquisition.Repositories
+namespace CustomerAcquisition.Domain.Model.Repositories
 {
     public interface ICustomerRepository
     {

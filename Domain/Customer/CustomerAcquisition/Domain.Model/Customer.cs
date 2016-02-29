@@ -13,6 +13,7 @@ namespace CustomerAcquisition.Domain.Model
         public Guid Id { get; private set; }
         public Document Document { get; internal set; }
         public Name Name { get; internal set; }
+		  public Address Address { get; internal set; }
 
         internal Customer()
         {

@@ -14,7 +14,9 @@ namespace Infrastructure.Data.Repositories
             _connectionString = connectionString;
         }
 
-        public IDbConnection Connection {
+		public IDbTransaction Transaction { get; set; }
+
+		public IDbConnection Connection {
             get
             {
                 if(_connection == null)
@@ -29,16 +31,44 @@ namespace Infrastructure.Data.Repositories
             }
         }
 
-        public void Dispose()
+		public void Dispose()
         {
             if(_connection != null)
             {
-                if(_connection.State == ConnectionState.Open)
-                {
-                    _connection.Close();
-                    _connection.Dispose();
-                }
+					if( Transaction != null )
+					{
+						Commit();
+					}
+
+               if(_connection.State == ConnectionState.Open)
+               {
+                   _connection.Close();
+                   _connection.Dispose();
+               }
             }
         }
-    }
+
+		public IDbTransaction BeginTransaction( IsolationLevel isolationLevel = IsolationLevel.ReadCommitted )
+		{
+			return Transaction = Connection.BeginTransaction( isolationLevel );
+		}
+
+		public void Commit()
+		{
+			if( Transaction != null )
+			{
+				Transaction.Commit();
+				Transaction = null;
+			}
+		}
+
+		public void Rollback()
+		{
+			if( Transaction != null )
+			{
+				Transaction.Rollback();
+				Transaction = null;
+			}
+		}
+	}
 }
